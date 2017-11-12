@@ -2,7 +2,6 @@ const Hapi = require('hapi');
 const Inert = require('inert');
 const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
-const Joi = require('joi');
 const Mongoose = require('mongoose');
 
 //create db connection
@@ -36,27 +35,14 @@ server.register([
     }
 ]);
 
-server.route({
-    method: 'GET',
-    path: '/',
-    handler: function (request, reply) {
-        reply("Hello World!").code(200);
-    },
-    config: {
-        tags: ['api'],
-        description: 'hello world!',
-        plugins: {
-            'hapi-swagger': {
-                responses: {
-                    200: {
-                        description: 'Success'
-                    }
-                }
-            }
-        }
-    }
-});
+//-----------------------------
+// PUBLIC API
+//-----------------------------
+require('./rounting/publicPaths')(server);
 
+//-----------------------------
+// START SERVER
+//-----------------------------
 server.start(function (err){
     console.log('Server running at:', server.info.uri);
 });
