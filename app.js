@@ -7,6 +7,9 @@ const Mongoose = require('mongoose');
 //create db connection
 require('./model/helper/databaseConnection');
 
+//create models
+require('./model/createModel');
+
 //---------------//
 //STARTING SERVER//
 //---------------//
