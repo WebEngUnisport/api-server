@@ -1,11 +1,22 @@
 const Joi = require('joi');
+const Mongoose = require('mongoose');
+
+var Course = Mongoose.model('Course');
+var Category = Mongoose.model('Category');
+var University = Mongoose.model('University');
 
 var registerPaths = (server) => {
     server.route({
         method: 'GET',
         path: '/courses',
         handler: function (request, reply) {
-            reply("get /courses").code(200);
+            Course.find({}, function (err, courses) {
+                if(err){
+                    reply({"error": "Problem with the courses"}).code(500);
+                } else {
+                    reply(courses).code(200);
+                }
+            });
         },
         config: {
             tags: ['api'],
@@ -33,7 +44,13 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/course/{course_id}',
         handler: function (request, reply) {
-            reply("get /courses/"+request.params.course_id).code(200);
+            Course.findById(request.params.course_id, function (err, course) {
+                if (err) {
+                    reply({"error": "There is no course with the given id"}).code(404);
+                } else {
+                    reply(course).code(200);
+                }
+            })
         },
         config: {
             tags: ['api'],
