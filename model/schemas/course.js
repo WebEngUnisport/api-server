@@ -3,7 +3,7 @@ const Mongoose = require('mongoose');
 var courseSchema = Mongoose.Schema({
 
     Kursbeschreibung: String,
-    //Bezeichnung der Aktivität: String,
+    "Bezeichnung der Aktivität": String,
     Perioden: String,
     Kurszeiten: String,
     Kursniveau: String,
