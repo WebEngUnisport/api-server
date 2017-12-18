@@ -14,7 +14,7 @@ var create = function ()
 	else
 	{
 		console.log('NOT running inside a Docker container');
-		dbUrl = 'mongodb://localhost:27017/unisport9';
+		dbUrl = 'mongodb://uniweb:uniweb@ds145275.mlab.com:45275/unisport9';
 	}
 
 	console.log("DB URL used: " + dbUrl);

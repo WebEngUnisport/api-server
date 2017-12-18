@@ -4,6 +4,8 @@ const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
 const Mongoose = require('mongoose');
 
+var corsHeaders = require('hapi-cors-headers')
+
 //create db connection
 require('./model/helper/databaseConnection');
 
@@ -16,7 +18,7 @@ require('./model/createModel');
 
 const server = new Hapi.Server();
 server.connection({
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     port: 8080,
     routes: {cors: true}
 });
@@ -42,6 +44,8 @@ server.register([
 // PUBLIC API
 //-----------------------------
 require('./rounting/publicPaths')(server);
+
+server.ext('onPreResponse', corsHeaders)
 
 //-----------------------------
 // START SERVER
