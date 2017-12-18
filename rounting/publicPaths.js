@@ -81,7 +81,8 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories',
         handler: function (request, reply) {
-            reply("get /categories").code(200);
+            reply(Category.find()).code(200)
+            //reply("get /categories").code(200);
         },
         config: {
             tags: ['api'],
@@ -102,7 +103,10 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            reply("get /courses/"+request.params.category_id).code(200);
+            Course.find({'category.Code':request.params.category_id},'sport university.Code activity',function(err, docs){
+                reply(docs).code(200);
+            });
+            //reply("get /courses/"+request.params.category_id).code(200);
         },
         config: {
             tags: ['api'],
@@ -133,7 +137,8 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            reply(University.find()).code(200)
+            //reply("get /universities").code(200);
         },
         config: {
             tags: ['api'],
