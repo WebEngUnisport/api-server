@@ -17,9 +17,10 @@ require('./model/createModel');
 //---------------//
 
 const server = new Hapi.Server();
+const PORT = process.env.PORT || 8080;
 server.connection({
-    host: '127.0.0.1',
-    port: 8080,
+    host: '0.0.0.0',
+    port: PORT,
     routes: {cors: true}
 });
 
