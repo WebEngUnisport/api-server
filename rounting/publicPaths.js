@@ -125,11 +125,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-<<<<<<< HEAD
-            Course.find({'category.Code':request.params.category_id},'sport university.Code activity times Zeit Tag',function(err, docs){
-                reply(docs).code(200);
-=======
-            Course.find({'category.Code':request.params.category_id},'sport university.Code activity', function (err, category) {
+            Course.find({'category.Code':request.params.category_id},'sport university.Code activity times Zeit Tag', function (err, category) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -140,7 +136,6 @@ var registerPaths = (server) => {
                 }
 
                 reply(category).code(200);
->>>>>>> e4130b115e1fdaa54f6fc52b393a60a207220fd9
             });
         },
         config: {
@@ -260,13 +255,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-<<<<<<< HEAD
-            Course.find({'university.Code':request.params.university_id},'sport university.Code activity times Zeit Tag',function(err, docs){
-                reply(docs).code(200);
-            });
-            //reply("get /universities").code(200);
-=======
-            Course.find({'university.Code': request.params.university_id}, function (err, courses) {
+            Course.find({'university.Code': request.params.university_id},'sport university.Code activity times Zeit Tag', function (err, courses) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -278,7 +267,6 @@ var registerPaths = (server) => {
 
                 reply(courses).code(200);
             })
->>>>>>> e4130b115e1fdaa54f6fc52b393a60a207220fd9
         },
         config: {
             tags: ['api'],
