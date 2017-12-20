@@ -18,8 +18,8 @@ var courseSchema = Mongoose.Schema({
     university: require('./university'),
     place: String,
     dates: [{
-        type: String,
-        validate: [min, '{PATH} needs at least one Date']
+        to: Date,
+        from: Date
     }],
 
     category: require('./category')
