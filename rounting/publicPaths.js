@@ -44,6 +44,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/course/{course_id}',
         handler: function (request, reply) {
+            //console.log(request.query.now);
             Course.findById(request.params.course_id, function (err, course) {
                 if (err) {
                     reply({"error": "There is no course with the given id"}).code(404);
@@ -103,7 +104,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            Course.find({'category.Code':request.params.category_id},'sport university.Code activity',function(err, docs){
+            Course.find({'category.Code':request.params.category_id},'sport university.Code activity times Zeit Tag',function(err, docs){
                 reply(docs).code(200);
             });
             //reply("get /courses/"+request.params.category_id).code(200);
@@ -180,7 +181,10 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            Course.find({'university.Code':request.params.university_id},'sport university.Code activity times Zeit Tag',function(err, docs){
+                reply(docs).code(200);
+            });
+            //reply("get /universities").code(200);
         },
         config: {
             tags: ['api'],
