@@ -198,7 +198,6 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities/courses',
         handler: function (request, reply) {
-            //TODO not working
             Course.find({}, function (err, courses) {
                 if (err) {
                     console.error(err);
