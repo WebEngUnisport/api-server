@@ -1,8 +1,8 @@
 const Mongoose = require('mongoose');
 
 var categorySchema = Mongoose.Schema({
-    name: String,
-    short: String
+    Name: String,
+    Code: String
 });
 
 module.exports = categorySchema;

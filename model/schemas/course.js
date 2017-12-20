@@ -2,22 +2,22 @@ const Mongoose = require('mongoose');
 
 var courseSchema = Mongoose.Schema({
 
-    Kursbeschreibung: String,
-    "Bezeichnung der Aktivität": String,
-    Perioden: String,
-    Kurszeiten: String,
-    Kursniveau: String,
-    Trainingsleitende: String,
-    Verantwortlich: String,
-    Bemerkungen: String,
-    Material: String,
-    Sprachen: String,
-    Continuous: Boolean,
-    Sport: String,
-    Link: String,
-    Uni: require('./university'),
-    Ort: String,
-    Dates: [{
+    description: String,
+    activity: String,
+    periods: String,
+    times: String,
+    level: String,
+    instructors: String,
+    responsible: String,
+    information: String,
+    material: String,
+    languages: String,
+    continuous: Boolean,
+    sport: String,
+    link: String,
+    university: require('./university'),
+    place: String,
+    dates: [{
         type: String,
         validate: [min, '{PATH} needs at least one Date']
     }],

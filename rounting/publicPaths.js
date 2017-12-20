@@ -11,12 +11,18 @@ var registerPaths = (server) => {
         path: '/courses',
         handler: function (request, reply) {
             Course.find({}, function (err, courses) {
-                if(err){
-                    reply({"error": "Problem with the courses"}).code(500);
-                } else {
-                    reply(courses).code(200);
+                if (err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
                 }
+
+                if (courses.length === 0) {
+                    return reply({"error": "There are no courses in the database"}).code(404);
+                }
+
+                reply(courses).code(200);
             });
+
         },
         config: {
             tags: ['api'],
@@ -45,11 +51,16 @@ var registerPaths = (server) => {
         path: '/course/{course_id}',
         handler: function (request, reply) {
             Course.findById(request.params.course_id, function (err, course) {
-                if (err) {
-                    reply({"error": "There is no course with the given id"}).code(404);
-                } else {
-                    reply(course).code(200);
+                if(err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
                 }
+
+                if(!course){
+                    return reply({"error": "There is no course with the given ID in our database"}).code(404);
+                }
+
+                reply(course).code(200);
             })
         },
         config: {
@@ -81,8 +92,18 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories',
         handler: function (request, reply) {
-            reply(Category.find()).code(200)
-            //reply("get /categories").code(200);
+            Category.find({}, function (err, categories) {
+                if(err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if(categories.length === 0){
+                    return reply({"error": "There are no categories in the database"}).code(404);
+                }
+
+                reply(categories).code(200);
+            });
         },
         config: {
             tags: ['api'],
@@ -103,14 +124,22 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            Course.find({'category.Code':request.params.category_id},'sport university.Code activity',function(err, docs){
-                reply(docs).code(200);
+            Course.find({'category.Code':request.params.category_id},'sport university.Code activity', function (err, category) {
+                if(err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if(!category){
+                    return reply({"error": "There is no category with the given ID in our database"}).code(404);
+                }
+
+                reply(category).code(200);
             });
-            //reply("get /courses/"+request.params.category_id).code(200);
         },
         config: {
             tags: ['api'],
-            description: 'Get a course with a certain id',
+            description: 'Returns all the courses from a certain category',
             validate: {
                 query: {
                     now: Joi.boolean(),
@@ -137,8 +166,18 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities',
         handler: function (request, reply) {
-            reply(University.find()).code(200)
-            //reply("get /universities").code(200);
+            University.find({}, function (err, universities) {
+                if(err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if(universities.length === 0){
+                    return reply({"error": "There are no universities in the database"}).code(404);
+                }
+
+                reply(universities).code(200);
+            });
         },
         config: {
             tags: ['api'],
@@ -159,7 +198,43 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities/courses',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            //TODO not working
+            Course.find({}, function (err, courses) {
+                if (err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if (courses.length === 0) {
+                    return reply({"error": "There are no courses in the database"}).code(404);
+                }
+
+                University.find({}, async function(err, universities){
+                    let result = [];
+
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (universities.length === 0) {
+                        return reply({"error": "There are no universities in the database"}).code(404);
+                    }
+
+                    await universities.forEach(async function(uni){
+                        let c = [];
+                        await courses.forEach(function(course) {
+                            if (course.university.Code === uni.Code) {
+                                c.push(course);
+                            }
+                        });
+
+                        result.push({Name: uni.Name, Code: uni.Code, courses: c});
+                    });
+
+                    await reply(result).code(200);
+                });
+            });
         },
         config: {
             tags: ['api'],
@@ -180,7 +255,18 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            Course.find({'university.Code': request.params.university_id}, function (err, courses) {
+                if(err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if(!courses){
+                    return reply({"error": "There is no courses for the given universities"}).code(404);
+                }
+
+                reply(courses).code(200);
+            })
         },
         config: {
             tags: ['api'],
@@ -209,35 +295,21 @@ var registerPaths = (server) => {
 
     server.route({
         method: 'GET',
-        path: '/university/{university_id}/categories',
-        handler: function (request, reply) {
-            reply("get /universities").code(200);
-        },
-        config: {
-            tags: ['api'],
-            description: 'Gets all the categories of a specified university',
-            validate: {
-                params: {
-                    university_id: Joi.string()
-                }
-            },
-            plugins: {
-                'hapi-swagger': {
-                    responses: {
-                        200: {
-                            description: 'Success'
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    server.route({
-        method: 'GET',
         path: '/university/{university_id}/category/{category_id}',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            Course.find({'university.Code': request.params.university_id, 'category.Code': request.params.category_id},
+                function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no courses for the given university and the given category"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                })
         },
         config: {
             tags: ['api'],
@@ -269,7 +341,19 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/course/{course_id}',
         handler: function (request, reply) {
-            reply("get /universities").code(200);
+            Course.find({'university.Code': request.params.university_id, 'course.Code': request.params.category_id},
+                function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no courses for the given university with the given id"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                })
         },
         config: {
             tags: ['api'],
@@ -296,6 +380,6 @@ var registerPaths = (server) => {
             }
         }
     });
-}
+};
 
 module.exports = registerPaths;
