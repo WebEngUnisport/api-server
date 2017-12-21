@@ -125,7 +125,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            Course.find({'category.code':request.params.category_id},'sport university.Code category.name times time day', function (err, category) {
+            Course.find({'category.code':request.params.category_id},'sport university.code category.name times time day', function (err, category) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -258,7 +258,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id},'sport university.Code category.name times time day', function (err, courses) {
+            Course.find({'university.code': request.params.university_id},'sport university.code category.name times time day', function (err, courses) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -300,7 +300,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/category/{category_id}',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id, 'category.Code': request.params.category_id},
+            Course.find({'university.code': request.params.university_id, 'category.code': request.params.category_id},
                 function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -344,7 +344,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/course/{course_id}',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id, 'course.Code': request.params.category_id},
+            Course.find({'university.code': request.params.university_id, 'course.code': request.params.category_id},
                 function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -372,6 +372,43 @@ var registerPaths = (server) => {
                     course_id: Joi.string()
                 }
             },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        200: {
+                            description: 'Success'
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/random',
+        handler: function (request, reply) {
+            Course.count().exec(function(err,count){
+                var random = Math.floor(Math.random()*count);
+                Course.findOne({},'sport university.code category.name times time day').skip(random).exec(
+                function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no courses in the database"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                })
+            }
+            );
+        },
+        config: {
+            tags: ['api'],
+            description: 'Get a random courses from the database',
             plugins: {
                 'hapi-swagger': {
                     responses: {
