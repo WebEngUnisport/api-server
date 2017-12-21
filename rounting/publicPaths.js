@@ -556,10 +556,11 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/random',
         handler: function (request, reply) {
-            Course.count().exec(function(err,count){
-                var random = Math.floor(Math.random()*count);
-                Course.findOne({},'sport university.code category.name times time day').skip(random).exec(
-                function (err, courses) {
+            let from = request.query.from;
+            let to = request.query.to;
+
+            if(from && to){
+                Course.find({}, function (err, courses) {
                     if (err) {
                         console.error(err);
                         return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -569,14 +570,57 @@ var registerPaths = (server) => {
                         return reply({"error": "There is no courses in the database"}).code(404);
                     }
 
-                    reply(courses).code(200);
-                })
+                    let parRes = [];
+
+                    courses.forEach(function (course) {
+                        let set = false;
+                        course.dates.forEach(function (date) {
+                            if (!set) {
+                                if (date.to <= to && date.from >= from) {
+                                    parRes.push(course);
+                                    set = true;
+                                }
+                            }
+                        })
+                    });
+                    if(parRes.length == 0){
+                        reply("empty").code(200);
+                    }
+                    else{
+                        var random = Math.floor(Math.random()*parRes.length);
+                        reply(parRes[random]).code(200);
+                    }                    
+                });
             }
-            );
+            else{
+                Course.count().exec(function(err,count){
+                    var random = Math.floor(Math.random()*count);
+                    Course.findOne({},'sport university.code category.name times time day').skip(random).exec(
+                    function (err, courses) {
+                        if (err) {
+                            console.error(err);
+                            return reply({"error": "Database problem. Please try again later."}).code(500);
+                        }
+
+                        if (!courses) {
+                            return reply({"error": "There is no courses in the database"}).code(404);
+                        }
+
+                        reply(courses).code(200);
+                    })
+                }
+                );
+            }
         },
         config: {
             tags: ['api'],
             description: 'Get a random courses from the database',
+            validate:{
+                query: {
+                    from: Joi.date(),
+                    to: Joi.date()
+                }
+            },
             plugins: {
                 'hapi-swagger': {
                     responses: {
