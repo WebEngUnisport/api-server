@@ -2,9 +2,8 @@ const Hapi = require('hapi');
 const Inert = require('inert');
 const Vision = require('vision');
 const HapiSwagger = require('hapi-swagger');
-const Mongoose = require('mongoose');
 
-var corsHeaders = require('hapi-cors-headers')
+var corsHeaders = require('hapi-cors-headers');
 
 //create db connection
 require('./model/helper/databaseConnection');
@@ -51,6 +50,10 @@ server.ext('onPreResponse', corsHeaders)
 //-----------------------------
 // START SERVER
 //-----------------------------
-server.start(function (err){
-    console.log('Server running at:', server.info.uri);
-});
+if (!module.parent) {
+    server.start(error => {
+        console.log('Server running at:', server.info.uri);
+    });
+}
+
+module.exports = server;
