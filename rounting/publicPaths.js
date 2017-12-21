@@ -10,26 +10,57 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/courses',
         handler: function (request, reply) {
-            Course.find({}, function (err, courses) {
-                if (err) {
-                    console.error(err);
-                    return reply({"error": "Database problem. Please try again later."}).code(500);
-                }
+            let from = request.query.from;
+            let to = request.query.to;
 
-                if (courses.length === 0) {
-                    return reply({"error": "There are no courses in the database"}).code(404);
-                }
+            if(from && to){
+                Course.find({}, function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
 
-                reply(courses).code(200);
-            });
+                    if (courses.length === 0) {
+                        return reply({"error": "There are no courses in the database"}).code(404);
+                    }
 
+                    let result = [];
+
+                    courses.forEach(function (course) {
+                        let set = false;
+                        course.dates.forEach(function (date) {
+                            if (!set) {
+                                if (date.to <= to && date.from >= from) {
+                                    result.push(course);
+                                    set = true;
+                                }
+                            }
+                        })
+                    });
+
+                    reply(result).code(200);
+                })
+            } else {
+
+                Course.find({}, function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (courses.length === 0) {
+                        return reply({"error": "There are no courses in the database"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                });
+            }
         },
         config: {
             tags: ['api'],
             description: 'Get all courses',
             validate: {
               query: {
-                  now: Joi.boolean(),
                   from: Joi.date(),
                   to: Joi.date()
               }
@@ -50,7 +81,6 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/course/{course_id}',
         handler: function (request, reply) {
-            //console.log(request.query.now);
             Course.findById(request.params.course_id, function (err, course) {
                 if(err) {
                     console.error(err);
@@ -68,11 +98,6 @@ var registerPaths = (server) => {
             tags: ['api'],
             description: 'Get a course with a certain id',
             validate: {
-                query: {
-                    now: Joi.boolean(),
-                    from: Joi.date(),
-                    to: Joi.date()
-                },
                 params: {
                     course_id: Joi.string()
                 }
@@ -125,25 +150,57 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            Course.find({'category.code':request.params.category_id},'sport university.Code category.name times time day', function (err, category) {
-                if(err) {
-                    console.error(err);
-                    return reply({"error": "Database problem. Please try again later."}).code(500);
-                }
+            let from = request.query.from;
+            let to = request.query.to;
 
-                if(!category){
-                    return reply({"error": "There is no category with the given ID in our database"}).code(404);
-                }
+            if(from && to){
+                Course.find({'category.code': request.params.category_id}, 'sport university.code category.name times time day dates', function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
 
-                reply(category).code(200);
-            });
+                    if (!courses) {
+                        return reply({"error": "There is no category with the given ID in our database"}).code(404);
+                    }
+
+                    let parRes = [];
+
+                    courses.forEach(function (course) {
+                        let set = false;
+                        course.dates.forEach(function (date) {
+                            if (!set) {
+                                if (date.to <= to && date.from >= from) {
+                                    course.dates = undefined;
+                                    parRes.push(course);
+                                    set = true;
+                                }
+                            }
+                        })
+                    });
+
+                    reply(parRes).code(200);
+                });
+            } else {
+                Course.find({'category.code': request.params.category_id}, 'sport university.code category.name times time day', function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no category with the given ID in our database"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                });
+            }
         },
         config: {
             tags: ['api'],
             description: 'Returns all the courses from a certain category',
             validate: {
                 query: {
-                    now: Joi.boolean(),
                     from: Joi.date(),
                     to: Joi.date()
                 },
@@ -199,49 +256,98 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities/courses',
         handler: function (request, reply) {
-            reply("Code").code(200);
-            /*
-            Course.find({}, function (err, courses) {
-                if (err) {
-                    console.error(err);
-                    return reply({"error": "Database problem. Please try again later."}).code(500);
-                }
+            let from = request.query.from;
+            let to = request.query.to;
 
-                if (courses.length === 0) {
-                    return reply({"error": "There are no courses in the database"}).code(404);
-                }
-
-                University.find({}, async function(err, universities){
-                    let result = [];
-
+            if(from && to){
+                Course.find({}, function (err, courses) {
                     if (err) {
                         console.error(err);
                         return reply({"error": "Database problem. Please try again later."}).code(500);
                     }
 
-                    if (universities.length === 0) {
-                        return reply({"error": "There are no universities in the database"}).code(404);
+                    if (courses.length === 0) {
+                        return reply({"error": "There are no courses in the database"}).code(404);
                     }
 
-                    await universities.forEach(async function(uni){
-                        let c = [];
-                        await courses.forEach(function(course) {
-                            if (course.university.Code === uni.Code) {
-                                c.push(course);
-                            }
+                    University.find({}, function (err, universities) {
+                        let result = [];
+
+                        if (err) {
+                            console.error(err);
+                            return reply({"error": "Database problem. Please try again later."}).code(500);
+                        }
+
+                        if (universities.length === 0) {
+                            return reply({"error": "There are no universities in the database"}).code(404);
+                        }
+
+                        universities.forEach(function (uni) {
+                            let c = [];
+                            courses.forEach(function (course) {
+                                if (course.university.code === uni.code) {
+                                    course.dates.forEach(function (date) {
+                                        if (date.to <= to && date.from >= from) {
+                                            c.push(course);
+                                        }
+                                    })
+                                }
+                            });
+
+                            result.push({name: uni.name, code: uni.code, courses: c});
                         });
 
-                        result.push({Name: uni.Name, Code: uni.Code, courses: c});
+                        reply(result).code(200);
                     });
-
-                    await reply(result).code(200);
                 });
-            });
-            */
+            } else {
+                Course.find({}, function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (courses.length === 0) {
+                        return reply({"error": "There are no courses in the database"}).code(404);
+                    }
+
+                    University.find({}, function (err, universities) {
+                        let result = [];
+
+                        if (err) {
+                            console.error(err);
+                            return reply({"error": "Database problem. Please try again later."}).code(500);
+                        }
+
+                        if (universities.length === 0) {
+                            return reply({"error": "There are no universities in the database"}).code(404);
+                        }
+
+                        universities.forEach(function (uni) {
+                            let c = [];
+                            courses.forEach(function (course) {
+                                if (course.university.code === uni.code) {
+                                    c.push(course);
+                                }
+                            });
+
+                            result.push({name: uni.name, code: uni.code, courses: c});
+                        });
+
+                        reply(result).code(200);
+                    });
+                });
+            }
         },
         config: {
             tags: ['api'],
             description: 'Gets all courses of all universities',
+            validate:{
+                query: {
+                    from: Joi.date(),
+                    to: Joi.date()
+                }
+            },
             plugins: {
                 'hapi-swagger': {
                     responses: {
@@ -258,25 +364,57 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id},'sport university.Code category.name times time day', function (err, courses) {
-                if(err) {
-                    console.error(err);
-                    return reply({"error": "Database problem. Please try again later."}).code(500);
-                }
+            let from = request.query.from;
+            let to = request.query.to;
 
-                if(!courses){
-                    return reply({"error": "There is no courses for the given universities"}).code(404);
-                }
+            if(from && to){
+                Course.find({'university.code': request.params.university_id}, 'sport university.code category.name times time day dates', function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
 
-                reply(courses).code(200);
-            })
+                    if (!courses) {
+                        return reply({"error": "There is no courses for the given universities"}).code(404);
+                    }
+
+                    let parRes = [];
+
+                    courses.forEach(function (course) {
+                        let set = false;
+                        course.dates.forEach(function (date) {
+                            if (!set) {
+                                if (date.to <= to && date.from >= from) {
+                                    course.dates = undefined;
+                                    parRes.push(course);
+                                    set = true;
+                                }
+                            }
+                        })
+                    });
+
+                    reply(parRes).code(200);
+                })
+            } else {
+                Course.find({'university.code': request.params.university_id}, 'sport university.code category.name times time day', function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no courses for the given universities"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                })
+            }
         },
         config: {
             tags: ['api'],
             description: 'Gets all courses of a specified university',
             validate: {
                 query: {
-                    now: Joi.boolean(),
                     from: Joi.date(),
                     to: Joi.date()
                 },
@@ -300,8 +438,13 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/category/{category_id}',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id, 'category.Code': request.params.category_id},
-                function (err, courses) {
+            let from = request.query.from;
+            let to = request.query.to;
+            let uId = request.params.university_id;
+            let cId = request.params.category_id;
+
+            if(from && to){
+                Course.find({'university.code': uId, 'category.code': cId}, function (err, courses) {
                     if (err) {
                         console.error(err);
                         return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -311,15 +454,42 @@ var registerPaths = (server) => {
                         return reply({"error": "There is no courses for the given university and the given category"}).code(404);
                     }
 
-                    reply(courses).code(200);
+                    let parRes = [];
+
+                    courses.forEach(function (course) {
+                        let set = false;
+                        course.dates.forEach(function (date) {
+                            if (!set) {
+                                if (date.to <= to && date.from >= from) {
+                                    parRes.push(course);
+                                    set = true;
+                                }
+                            }
+                        })
+                    });
+
+                    reply(parRes).code(200);
                 })
+            } else {
+                Course.find({'university.code': uId, 'category.code': cId}, function (err, courses) {
+                        if (err) {
+                            console.error(err);
+                            return reply({"error": "Database problem. Please try again later."}).code(500);
+                        }
+
+                        if (!courses) {
+                            return reply({"error": "There is no courses for the given university and the given category"}).code(404);
+                        }
+
+                        reply(courses).code(200);
+                    })
+            }
         },
         config: {
             tags: ['api'],
             description: 'Gets all courses of a certain category from a given university',
             validate: {
                 query: {
-                    now: Joi.boolean(),
                     from: Joi.date(),
                     to: Joi.date()
                 },
@@ -344,7 +514,10 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/course/{course_id}',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id, 'course.Code': request.params.category_id},
+            let uId = request.params.university_id;
+            let cId = request.params.course_id;
+
+            Course.find({'university.code': uId, _id: cId},
                 function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -362,11 +535,6 @@ var registerPaths = (server) => {
             tags: ['api'],
             description: 'Gets a certain course form a given university',
             validate: {
-                query: {
-                    now: Joi.boolean(),
-                    from: Joi.date(),
-                    to: Joi.date()
-                },
                 params: {
                     university_id: Joi.string(),
                     course_id: Joi.string()

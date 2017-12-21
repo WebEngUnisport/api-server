@@ -1,8 +1,8 @@
 const Mongoose = require('mongoose');
 
 var universitySchema = Mongoose.Schema({
-    Name: String,
-    Code: String
+    name: String,
+    code: String
 });
 
 module.exports = universitySchema;
