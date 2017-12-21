@@ -14,6 +14,9 @@ var registerPaths = (server) => {
             let to = request.query.to;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({}, function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -154,6 +157,9 @@ var registerPaths = (server) => {
             let to = request.query.to;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({'category.code': request.params.category_id}, 'sport university.code category.name times time day dates', function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -260,6 +266,9 @@ var registerPaths = (server) => {
             let to = request.query.to;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({}, function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -368,6 +377,9 @@ var registerPaths = (server) => {
             let to = request.query.to;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({'university.code': request.params.university_id}, 'sport university.code category.name times time day dates', function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -444,6 +456,9 @@ var registerPaths = (server) => {
             let cId = request.params.category_id;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({'university.code': uId, 'category.code': cId}, function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -560,6 +575,9 @@ var registerPaths = (server) => {
             let to = request.query.to;
 
             if(from && to){
+                if(from >= to ){
+                    return reply({"error": "From has to be smaller then to"}).code(400)
+                }
                 Course.find({}, function (err, courses) {
                     if (err) {
                         console.error(err);
@@ -583,7 +601,7 @@ var registerPaths = (server) => {
                             }
                         })
                     });
-                    if(parRes.length == 0){
+                    if(parRes.length === 0){
                         reply("empty").code(200);
                     }
                     else{

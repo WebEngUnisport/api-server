@@ -1,3 +1,11 @@
+//-----SETUP-----
+// install ava as global package
+// execute:
+// npm install --global ava
+
+//all test in the "test" folder will get executed
+//you can execute the files via npm test in the route folder
+
 import test from 'ava';
 import server from '../app';
 import schemas from '../rounting/helper/respSchemas';
