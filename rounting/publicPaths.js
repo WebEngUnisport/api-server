@@ -551,6 +551,85 @@ var registerPaths = (server) => {
             }
         }
     });
+
+    server.route({
+        method: 'GET',
+        path: '/random',
+        handler: function (request, reply) {
+            Course.count().exec(function(err,count){
+                var random = Math.floor(Math.random()*count);
+                Course.findOne({},'sport university.code category.name times time day').skip(random).exec(
+                function (err, courses) {
+                    if (err) {
+                        console.error(err);
+                        return reply({"error": "Database problem. Please try again later."}).code(500);
+                    }
+
+                    if (!courses) {
+                        return reply({"error": "There is no courses in the database"}).code(404);
+                    }
+
+                    reply(courses).code(200);
+                })
+            }
+            );
+        },
+        config: {
+            tags: ['api'],
+            description: 'Get a random courses from the database',
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        200: {
+                            description: 'Success'
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/day/{day_code}',
+        handler: function (request, reply) {
+            var dayTable = ["(Monday|Lundi|Montag)","(Thuesday|Mardi|Dienstag)","(Wednesday|Mercredi|Mittwoch)",
+            "(Thursday|Jeudi|Donnerstag)","(Friday|Vendredi|Freitag)","(Saturnday|Samedi|Samstag)","(Sunday|Dimanche|Sonntag)"];
+            var dayToSearch = dayTable[parseInt(request.params.day_code)];
+            Course.find({$or:[{"times":{"$regex":dayToSearch,"$options":"i"}},{"day":{"$regex":dayToSearch,"$options":"i"}}]},'sport university.code category.name times time day',
+            function (err, courses) {
+                if (err) {
+                    console.error(err);
+                    return reply({"error": "Database problem. Please try again later."}).code(500);
+                }
+
+                if (!courses) {
+                    return reply({"error": "There is no courses this day"}).code(404);
+                }
+
+                reply(courses).code(200);
+            })
+
+        },
+        config: {
+            tags: ['api'],
+            description: 'Get courses from the day',
+            validate: {
+                params: {
+                    day_code: Joi.string()
+                }
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        200: {
+                            description: 'Success'
+                        }
+                    }
+                }
+            }
+        }
+    });
 };
 
 module.exports = registerPaths;
