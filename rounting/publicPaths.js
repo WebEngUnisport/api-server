@@ -125,7 +125,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/categories/{category_id}',
         handler: function (request, reply) {
-            Course.find({'category.Code':request.params.category_id},'sport university.Code activity times Zeit Tag', function (err, category) {
+            Course.find({'category.code':request.params.category_id},'sport university.Code category.name times time day', function (err, category) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
@@ -199,6 +199,8 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/universities/courses',
         handler: function (request, reply) {
+            reply("Code").code(200);
+            /*
             Course.find({}, function (err, courses) {
                 if (err) {
                     console.error(err);
@@ -235,6 +237,7 @@ var registerPaths = (server) => {
                     await reply(result).code(200);
                 });
             });
+            */
         },
         config: {
             tags: ['api'],
@@ -255,7 +258,7 @@ var registerPaths = (server) => {
         method: 'GET',
         path: '/university/{university_id}/courses',
         handler: function (request, reply) {
-            Course.find({'university.Code': request.params.university_id},'sport university.Code activity times Zeit Tag', function (err, courses) {
+            Course.find({'university.Code': request.params.university_id},'sport university.Code category.name times time day', function (err, courses) {
                 if(err) {
                     console.error(err);
                     return reply({"error": "Database problem. Please try again later."}).code(500);
