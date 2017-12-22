@@ -102,7 +102,7 @@ var registerPaths = (server) => {
             description: 'Get a course with a certain id',
             validate: {
                 params: {
-                    course_id: Joi.string()
+                    course_id: Joi.string().required()
                 }
             },
             plugins: {
@@ -211,7 +211,7 @@ var registerPaths = (server) => {
                     to: Joi.date()
                 },
                 params: {
-                    category_id: Joi.string()
+                    category_id: Joi.string().required()
                 }
             },
             plugins: {
@@ -431,7 +431,7 @@ var registerPaths = (server) => {
                     to: Joi.date()
                 },
                 params: {
-                    university_id: Joi.string()
+                    university_id: Joi.string().required()
                 }
             },
             plugins: {
@@ -509,8 +509,8 @@ var registerPaths = (server) => {
                     to: Joi.date()
                 },
                 params: {
-                    university_id: Joi.string(),
-                    category_id: Joi.string()
+                    university_id: Joi.string().required(),
+                    category_id: Joi.string().required()
                 }
             },
             plugins: {
@@ -551,8 +551,8 @@ var registerPaths = (server) => {
             description: 'Gets a certain course form a given university',
             validate: {
                 params: {
-                    university_id: Joi.string(),
-                    course_id: Joi.string()
+                    university_id: Joi.string().required(),
+                    course_id: Joi.string().required()
                 }
             },
             plugins: {

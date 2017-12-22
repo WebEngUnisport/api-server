@@ -11,7 +11,6 @@ import server from '../app';
 import schemas from '../rounting/helper/respSchemas';
 
 const Joi = require('joi');
-let fs = require('fs');
 
 let courseId;
 let uniId = 'FRI';
